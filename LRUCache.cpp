@@ -4,8 +4,10 @@
 
 using namespace std;
 
+// LRU Cache using HashMap + Doubly Linked List for O(1) operations
 class Node {
-    public:
+public:
+    // Stores cache entry and links for Doubly Linked List navigation
     int key;
     int value;
     Node* prev;
@@ -19,18 +21,21 @@ class Node {
 };
 
 class LRUCache {
-    private:
+private:
     int capacity;
     unordered_map <int, Node*> map;
 
     Node* head;
     Node* tail;
 
+    // Removes node from current position
     void removeNode(Node* node) {
+        if(!node || node == head || node == tail) return;
         node->prev->next = node->next;
         node->next->prev = node->prev;
     }
 
+    // Insert node as most recently used
     void addToFront(Node* node) {
         node->prev = head;
         node->next = head->next;
@@ -40,6 +45,7 @@ class LRUCache {
 
     public:
 
+    // Access value and mark as recently used
     int get(int key) {
         if(map.find(key) == map.end()) return -1;
         Node* node = map[key];
@@ -48,22 +54,23 @@ class LRUCache {
         return node->value;
     }
 
+    // Insert/update cache entry with LRU eviction
     void put(int key, int value) {
+        if(capacity == 0) return;
+
         if(map.find(key) != map.end()) {
             Node* node = map[key];
             node->value = value;
             removeNode(node);
             addToFront(node);
-            map[key] = node;
         } else {
             if(map.size() == capacity) {
+                // Cache full then evict least recently used node
                 Node* lru = tail->prev;
                 removeNode(lru);
                 map.erase(lru->key);
                 delete lru;
             }
-
-            else if(capacity == 0) return;
 
             Node* newNode = new Node(key, value);
             addToFront(newNode);
@@ -74,13 +81,14 @@ class LRUCache {
     void display() {
         Node* current = head->next;
         while(current != tail) {
-            cout << "(" << current->key << "," << current->value << ")";
+            cout << "(" << current->key << "," << current->value << ") ";
             current = current->next;
         }
 
         cout << endl;
     } 
 
+    // Initialize cache with dummy head and tail nodes
     LRUCache(int cap) {
         capacity = cap;
 
@@ -91,6 +99,7 @@ class LRUCache {
         tail->prev = head;
     }
 
+    // Free allocated memory
     ~LRUCache() {
         Node* current = head;
         Node* nextNode;
@@ -103,6 +112,7 @@ class LRUCache {
 
 };
 
+// Simple CLI to test cache operations 
 int main () {
     cout << "Enter the capacity :" << endl;
     int cap;
